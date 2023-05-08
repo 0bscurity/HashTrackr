@@ -6,8 +6,9 @@ from tkinter import *
 from tkinter import ttk
 
 url = ""
-check_period = 60  # in seconds
+check_period = 1  # in seconds
 stop_checking = False
+
 
 def fetch_and_hash(url):
     response = requests.get(url)
@@ -15,19 +16,23 @@ def fetch_and_hash(url):
     content_hash = hashlib.sha256(content).hexdigest()
     return content_hash
 
+
 def check_website_changes(url, output_text):
     global stop_checking
     initial_hash = fetch_and_hash(url)
+    change_count = 0
 
     while not stop_checking:
+        change_count += 1
         time.sleep(check_period)
         new_hash = fetch_and_hash(url)
 
         if initial_hash != new_hash:
-            output_text.set("The website content has changed.")
+            output_text.set(f"The website content has changed >= {change_count} time(s).")
             initial_hash = new_hash
         else:
             output_text.set("No change detected.")
+
 
 def start_checking():
     global stop_checking
@@ -42,10 +47,12 @@ def start_checking():
     check_thread.daemon = True
     check_thread.start()
 
+
 def stop_checking_process():
     global stop_checking
     stop_checking = True
     output_text.set("Stopped checking.")
+
 
 root = Tk()
 root.title("HashTrackr")
